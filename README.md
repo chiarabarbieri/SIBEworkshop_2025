@@ -26,7 +26,9 @@ For this practical you will be working with:
 - The terminal of your computer
 - Your local RStudio
 
-In the terminal, download this github folder as
+In the terminal, download this github folder as git clone https://github.com/chiarabarbieri/SIBEworkshop_2025/
+
+The raw genetic data can be downloaded from this link https://drive.google.com/drive/folders/1kqdUFLaDe13E-7h2n9prKwY2Sc5eIDH_?usp=sharing 
 
 Now open RStudio and run the following command to install the packages
 we will need:
