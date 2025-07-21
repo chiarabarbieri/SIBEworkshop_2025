@@ -2,16 +2,16 @@ WORK IN PROGRESS!
 
 # Genetic Structure and Language Diversity in Europe
 
-Population genetics practical: PCA, ADMIXTURE, F<sub>ST</sub>, and
+Population genetics practical: PCA, F<sub>ST</sub>, ADMIXTURE, and
 linguistic comparisons
 
 Goals.
 
--   Understand and apply population analysis tools (PCA, ADMIXTURE,
-    F<sub>ST</sub>)
+-   Understand and apply population analysis tools (PCA,
+    F<sub>ST</sub>, ADMIXTURE)
 -   Explore genetic diversity patterns in Europe
 -   Compare genetic structure with linguistic diversity (focus:
-    Indo-European, Uralic, Basque)
+    Indo-European)
 -   Develop command-line and R skills for population genetics
 
 ## Practical set up
