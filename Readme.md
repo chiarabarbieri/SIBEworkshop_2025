@@ -1,8 +1,6 @@
----
-title: "SIBE Workshop - Introduction to Population Genetics"
-author: "Chiara Barbieri"
----
+# SIBE Workshop - Introduction to Population Genetics
 
+**Chiara Barbieri**
 
 # Genetic Structure and Language Diversity in Europe
 
@@ -360,7 +358,7 @@ distances. The result is stored in a matrix of size Number of
 Populations x Number of Populations. I already generated the Fst
 distance matrix, which is stored in your files.
 
-    pairwise_fsts <- read.table("pairwise_fsts.txt", sep="\t", header=T, row.names=1)
+    pairwise_fsts <- read.table("pairwise_fsts1.txt", sep="\t", header=T, row.names=1)
     pairwise_fsts<-as.matrix(pairwise_fsts)
 
 How to display population distances? We can use a tree visualization,
@@ -506,7 +504,7 @@ will be repeated for all the populations that speak the same language.
       )
 
     merged_table <- merged_table %>%
-      distinct()
+      distinct()  # delete duplicated rows
 
 
     # make the language time matrix with the populations present in gelato
