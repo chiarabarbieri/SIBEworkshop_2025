@@ -1,14 +1,18 @@
-WORK IN PROGRESS!
+---
+title: "SIBE Workshop - Introduction to Population Genetics"
+author: "Chiara Barbieri"
+---
+
 
 # Genetic Structure and Language Diversity in Europe
 
 Population genetics practical: PCA, F<sub>ST</sub>, ADMIXTURE, and
 linguistic comparisons
 
-Goals.
+Goals:
 
--   Understand and apply population analysis tools (PCA,
-    F<sub>ST</sub>, ADMIXTURE)
+-   Understand and apply population analysis tools (PCA, F<sub>ST</sub>,
+    ADMIXTURE)
 -   Explore genetic diversity patterns in Europe
 -   Compare genetic structure with linguistic diversity (focus:
     Indo-European)
@@ -26,7 +30,7 @@ In the terminal, download this github folder as ….
 
 ***Teresa: please install*** the packages we will need:
 
-    install.packages(c("maps", "ggrepel", "ggplot2", "tidyverse", "ape", "readr", "tidypopgen", "ggtree", "phytools", "reshape"), repos="http://cran.us.r-project.org")
+    install.packages(c("maps", "ggrepel", "ggplot2", "tidyverse", "ape", "readr", "tidypopgen", "ggtree", "phytools", "reshape", "scatterpie"), repos="http://cran.us.r-project.org")
 
 Set the working directory in your RStudio pointing to your computer
 location where you downloaded the files. (Session –&gt; Set Working
@@ -34,17 +38,18 @@ Directory –&gt; Choose Directory)
 
 ## A dataset of Human Diversity
 
-In this exercise we are going to work with a SNP dataset of different
-human populations from Western Eurasia. The purpose of these analysis is
-to understand human genetic variation through the lens of population
-history and linguistic diversity.
+In this exercise we are going to work with a SNP dataset comprising
+different human populations from Western Eurasia. The purpose of these
+analyses is to understand human genetic variation through the lens of
+population history and linguistic diversity.
 
 The individuals are genotyped with a SNP chip array designed by for
 maximizing information on human diversity and demographic events, named
 Human Origins (Affymetrix).
 
 We will using `PLINK`, a software for data manipulation and basic
-statistics, and `ADMIXTURE` for reconstructing different ancestry across
+statistics, some R scripts and dedicated packages for population genetic
+analysis, and `ADMIXTURE` for reconstructing different ancestry across
 individuals.
 
 Our dataset includes 173 populations matched with linguistic identifiers
@@ -60,8 +65,9 @@ al. 2019](https://pmc.ncbi.nlm.nih.gov/articles/PMC6542712/). -
 [Flores-Bello et
 al. 2021](https://www.cell.com/current-biology/fulltext/S0960-9822(21)00349-3?_returnURL=https%3A%2F%2Flinkinghub.elsevier.com%2Fretrieve%2Fpii%2FS0960982221003493%3Fshowall%3Dtrue).
 
-For this exercise, we are setting a multidisciplinary study, and use
-genetics to explore the following questions related to linguistics:
+For this exercise, we are considering a multidisciplinary perspective,
+and use genetics to explore the following questions related to
+linguistics:
 
 1.  Is the genetic diversity of European population corresponding to the
     distribution of different language families?
@@ -231,7 +237,7 @@ observations\] - \[expected count\])) to *plink.het*.
 
     plink --bfile EurasiaSelection --het
 
-Visualize the difference in homozygosity within populations.
+Visualize the difference in homozygosity between language families.
 
     # Import file with heterozigosity info
     het <- read.table("plink.het", header=T)
@@ -243,22 +249,6 @@ Visualize the difference in homozygosity within populations.
     # Join by Sample_ID
     fam_annotated <- left_join(fam_annotated, het[, c("Sample_ID", "F")], by = "Sample_ID")
 
-    # now the plot, grouping populations by language family
-    ggplot(fam_annotated, aes(x = reorder(PopName, F, FUN = median), y = F, fill = LangFamily)) +
-      geom_boxplot(outlier.size = 0.8) +
-      scale_fill_manual(values = colorini) +
-      facet_wrap(~ LangFamily, scales = "free_x") +  # Create separate panels per family
-      theme_minimal(base_size = 12) +
-      theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 2),
-            legend.position = "none",
-            strip.text = element_text(size = 10, face = "bold")) +
-      labs(title = "Inbreeding Coefficient (F) per Population",
-           x = "Population",
-           y = "F (observed vs expected heterozygosity)")
-
-![](figures/unnamed-chunk-3-1.png)
-
-Visualize the difference in homozygosity within Language Families
 
     ggplot(fam_annotated, aes(x = reorder(LangFamily, F), y = F, fill = LangFamily)) +
       geom_boxplot(outlier.size = 0.8) +
@@ -271,7 +261,7 @@ Visualize the difference in homozygosity within Language Families
            y = "F (observed vs expected heterozygosity)",
            fill = "Language Family")
 
-![](figures/unnamed-chunk-4-1.png)
+![](figures/unnamed-chunk-3-1.png)
 
 Visualize the difference in homozygosity on a map.
 
@@ -290,23 +280,26 @@ Visualize the difference in homozygosity on a map.
                               high = "red") +
          ggtitle("Intensity of homozygosity in each population")
 
-![](figures/unnamed-chunk-5-1.png)
+![](figures/unnamed-chunk-4-1.png)
 
 ------------------------------------------------------------------------
 
 ## PCA
 
-With the modifier *–pca*. PLINK extracts the top 20 principal components
-of the variance-standardized relationship matrix. The results consist in
-a *.eigenvec* file with the coordinates for each individual in rows and
-eigenvectors in columns, and a *.eigenval* which explains how much
-variance there is in the data for that given vector.
+With the modifier *–pca*. `plink` extracts the top 20 principal
+components of the variance-standardized relationship matrix. The results
+consist in a *.eigenvec* file with the coordinates for each individual
+in rows and eigenvectors in columns, and a *.eigenval* which explains
+how much variance there is in the data for that given vector.
+
+Can you run the PCA command in `plink`, and guess the command by
+yourself? Once you run the PCA, we can plot it in R.
 
     # Import files with eigenvectors & eigenvalues
     eigenvec <- read.table("plink.eigenvec")
     eigenval <- read.table("plink.eigenval")
 
-    pcaR_coord<-cbind(eigenvec, fam_annotated)
+    pcaR_coord<-cbind(eigenvec, fam_annotated) # make a new file with the PCA coordinates and the information from fam_annotated
 
     #ggplot 1v2
     ggplot(pcaR_coord, #dataset to plot
@@ -321,7 +314,7 @@ variance there is in the data for that given vector.
                  y = eigenval[2,],
                  title = "PCA analysis dimension 1 vs. 2")
 
-![](figures/unnamed-chunk-6-1.png)
+![](figures/unnamed-chunk-5-1.png)
 
 How are the language families distributed across the genetic diversity
 of Eurasia? Can you plot Dimension 1 against Dimension 3 - PC1 vs PC3?
@@ -364,7 +357,8 @@ added to the gen\_tibble as column “population”.
 
 It takes a few minutes to calculate all the pairwise population
 distances. The result is stored in a matrix of size Number of
-Populations x Number of Populations.
+Populations x Number of Populations. I already generated the Fst
+distance matrix, which is stored in your files.
 
     pairwise_fsts <- read.table("pairwise_fsts.txt", sep="\t", header=T, row.names=1)
     pairwise_fsts<-as.matrix(pairwise_fsts)
@@ -391,7 +385,7 @@ display as implemented in the package ‘ape’.
       theme(legend.position = "right")
     tree
 
-![](figures/unnamed-chunk-8-1.png)
+![](figures/unnamed-chunk-7-1.png)
 
 You can plot the tree with different layout, for example adding layout =
 “circular” or layout = “unrooted” inside the ggtree specification.
@@ -421,8 +415,8 @@ Indo-European language family.
 ![](IECoR_Main_M3_Binary_Covarion_Rates_By_Mg_Bin_mcc.tree.svg)<!-- -->
 
 We are using their linguistic distances and compare them to our genetic
-distances, for a subset of population/languages that we can match
-between the two, to reproduce the iconic comparisons first published by
+distances, for a subset of population/languages that overlap between the
+two, to reproduce the iconic comparisons first published by
 Cavalli-Sforza and colleagues in 1988.
 <https://pubmed.ncbi.nlm.nih.gov/3166138/>
 
@@ -530,6 +524,9 @@ will be repeated for all the populations that speak the same language.
       }
     }
 
+And finally, we make the tree comparison, with the genetic tree on the
+left and the linguistic tree on the right:
+
     # now, trees
 
     phy1 <- nj(pairwise_fsts_subset)
@@ -586,39 +583,40 @@ How many SNPs are left after pruning?
 
 ### ADMIXTURE run
 
-Now the proper ADMIXTURE run. The following commands will perform 5 runs of ADMIXTURE
-for each *K* (number of ancestry blocks) desired. One value of *K* will
-be more supported by the analysis: the one with the lowest associated
-cross-validation error. This *K* will be considered as the best
-representation of the actual data variation.
+Now the proper ADMIXTURE run. The following commands will perform 5 runs
+of ADMIXTURE for each *K* (number of ancestry blocks) desired. One value
+of *K* will be more supported by the analysis: the one with the lowest
+associated cross-validation error. This *K* will be considered as the
+best representation of the actual data variation.
 
-Copy-paste the commands below in a file called `admixture_script.sh` and then run it in the terminal as
-sh admixture_script.sh
-Or run these commands directly in the terminal. 
+Copy-paste the commands below in a file called `admixture_script.sh` and
+then run it in the terminal as sh admixture\_script.sh - Or run these
+commands directly in the terminal.
 
     typeset -i run=0
     while (( run < 5 )); do  ##  with 5 runs for each K
     run=$(( run + 1 ));
     for K in 2 3 4 5 6 7 8 9 10; do  # select a meaningful series of K - the more Ks, the longer the run obviously
-	admixture -s time --cv EurasiaSelection_pruned.ped $K -j6 | tee log.K${K}.RUN$run.out;
+    admixture -s time --cv EurasiaSelection_pruned.ped $K -j6 | tee log.K${K}.RUN$run.out;
     mv EurasiaSelection_pruned.$K.P K$K.Run$run.P;
     mv EurasiaSelection_pruned.$K.Q K$K.Run$run.Q;
     done;
     done
 
+Once your file is ready, run the following:
 
+    sh admixture_script.sh
 
-As this takes some time to run, i did
-it already before for this exercise. The results are stored in THIS
-FOLDER!!!! I run 5 iterations for each K from K=2 to K=10. We need to
-repeat the runs to exclude the chance of some runs not exploring the
-variability space well enough.
-
+As this takes some time to run, i did it already before for this
+exercise. The results are stored in THIS FOLDER!!!! I run 5 iterations
+for each K from K=2 to K=10. We need to repeat the runs to exclude the
+chance of some runs not exploring the variability space well enough.
 
 For each run there are three output: .out, .P, and .Q
 
 Each run is associated to a Cross-Validation error. A good value of K
-will exhibit a low cross-validation error compared to other K values. Here we visualize the CV values of all the five runs for each K.
+will exhibit a low cross-validation error compared to other K values.
+Here we visualize the CV values of all the five runs for each K.
 
     grep -h CV log*out > CV.txt
 
@@ -636,8 +634,8 @@ Open the terminal in the folder where the ADMIXTURE results are, and run
 
 `PONG` uses the filemap to localize the names of each run for each K,
 the famm.txt to match each individual with a population name, and the
-listAdmixture.txt to order the populations in our preferred way to spot patterns, according to some criteria of our choice. 
-I grouped populations by language family, and sort them
+listAdmixture.txt to order the populations in a way that makes some
+sense for us. I grouped populations by language family, and sort them
 according to their longitude.
 
 Follow `PONG` ’s instructions in the terminal, and open the browser with
@@ -645,7 +643,81 @@ a dedicated link. You can visualize and explore the admixture results in
 an interactive way, zooming in regions of interest. Note that for some
 K, more than one configurations are found by Admixture.
 
-![](admixtureFigure.png)
+![](admixtureFigure.png) Another way to visualize Admixture results, is
+on a map, as separate population frequencies. We can pick the results at
+K=5, which was associated to a low Cross Validation error, and plot them
+on the map.
+
+    library(scatterpie) # to make pie charts
+
+    # Load your ADMIXTURE Q file 
+    K5 <- read.table("K5.Run3.Q", header=FALSE)
+
+    # Rename columns
+    colnames(K5) <- paste0("Ancestry", 1:5)
+
+    # Bind to population info
+    eurasia_admix <- cbind(fam_annotated, K5)
+
+    # MAP
+    map.world <- map_data(map = "world")
+
+    gg2 <- ggplot() +
+      geom_map(data = map.world, map = map.world,
+               aes(map_id = region),
+               fill = "white", colour = "black", size = 0.15) +
+      coord_quickmap(ylim = c(29, 70), xlim = c(-11, 65)) +
+      theme_minimal()
+
+    # Add pie charts
+     gg2 + 
+      geom_scatterpie(data = eurasia_admix,
+                      aes(x = lon, y = lat),
+                      cols = paste0("Ancestry", 1:5),
+                      color = NA,
+                      pie_scale = 0.7,) +  # adjust pie size if needed
+    coord_fixed()  
+
+![](figures/unnamed-chunk-12-1.png)
 
 Look at patterns across populations. Do they follow a geographic
 structure? Is there a sign of Admixture?
+
+We can finally see if some ancestries are particularly associated to
+certain language families.
+
+    # Reshape into long format
+    K5_long <- eurasia_admix %>%
+      pivot_longer(
+        cols = starts_with("Ancestry"),
+        names_to = "Component",
+        values_to = "AncestryValue"
+      )
+
+    # and visualize distribution of K per language family, by boxplots
+
+    ggplot(K5_long, aes(x = LangFamily, y = AncestryValue, fill = LangFamily)) +
+      geom_boxplot(alpha = 0.7, outlier.size = 0.4) +
+      scale_fill_manual(values = colorini) +
+      theme_minimal(base_size = 10) +
+      theme(
+        axis.text.x = element_text(angle = 45, hjust = 1, size = 8),
+        legend.position = "none",
+        strip.text = element_text(face = "bold")
+      ) +
+      labs(
+        title = "ADMIXTURE Components (K=5) by Language Family",
+        x = "Language Family",
+        y = "Ancestry Proportion"
+      ) +
+      facet_wrap(~ Component, ncol = 1)
+
+![](figures/unnamed-chunk-13-1.png)
+
+Are some ancestries associated to specific language families, or they
+are just characteristic of different geographic and ecological regions?
+
+The exercise is finished - congratulations! You learned about population
+genetics basic techniques, and opened your perspectives on data
+interpretation. Language diversity is one fascinating field to study
+human demographic history and present diversity.
