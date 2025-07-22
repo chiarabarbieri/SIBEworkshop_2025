@@ -586,34 +586,39 @@ How many SNPs are left after pruning?
 
 ### ADMIXTURE run
 
-Now the proper ADMIXTURE run. The following commands will run ADMIXTURE
+Now the proper ADMIXTURE run. The following commands will perform 5 runs of ADMIXTURE
 for each *K* (number of ancestry blocks) desired. One value of *K* will
 be more supported by the analysis: the one with the lowest associated
 cross-validation error. This *K* will be considered as the best
 representation of the actual data variation.
 
-Copy-paste the commands below in a file called `admixture_script.sh` Or
-run it directly in the terminal. As this takes some time to run, i did
+Copy-paste the commands below in a file called `admixture_script.sh` and then run it in the terminal as
+sh admixture_script.sh
+Or run these commands directly in the terminal. 
+
+    typeset -i run=0
+    while (( run < 5 )); do  ##  with 5 runs for each K
+    run=$(( run + 1 ));
+    for K in 2 3 4 5 6 7 8 9 10; do  # select a meaningful series of K - the more Ks, the longer the run obviously
+	admixture -s time --cv EurasiaSelection_pruned.ped $K -j6 | tee log.K${K}.RUN$run.out;
+    mv EurasiaSelection_pruned.$K.P K$K.Run$run.P;
+    mv EurasiaSelection_pruned.$K.Q K$K.Run$run.Q;
+    done;
+    done
+
+
+
+As this takes some time to run, i did
 it already before for this exercise. The results are stored in THIS
 FOLDER!!!! I run 5 iterations for each K from K=2 to K=10. We need to
 repeat the runs to exclude the chance of some runs not exploring the
 variability space well enough.
 
-    typeset -i run=0
-    for K in 2 3 4 5; do  # select a meaningful series of K - the more Ks, the longer the run obviously
-    ./admixture -s time --cv EurasiaSelection_pruned.ped $K -j2 | tee log.K${K}.RUN1.out;
-    mv EurasiaSelection_pruned.$K.P K$K.Run1.P;
-    mv EurasiaSelection_pruned.$K.Q K$K.Run1.Q;
-    done
-
-Once your file is ready, run the following:
-
-    sh admixture_script.sh
 
 For each run there are three output: .out, .P, and .Q
 
 Each run is associated to a Cross-Validation error. A good value of K
-will exhibit a low cross-validation error compared to other K values.
+will exhibit a low cross-validation error compared to other K values. Here we visualize the CV values of all the five runs for each K.
 
     grep -h CV log*out > CV.txt
 
@@ -631,8 +636,8 @@ Open the terminal in the folder where the ADMIXTURE results are, and run
 
 `PONG` uses the filemap to localize the names of each run for each K,
 the famm.txt to match each individual with a population name, and the
-listAdmixture.txt to order the populations in a way that makes some
-sense for us. I grouped populations by language family, and sort them
+listAdmixture.txt to order the populations in our preferred way to spot patterns, according to some criteria of our choice. 
+I grouped populations by language family, and sort them
 according to their longitude.
 
 Follow `PONG` ’s instructions in the terminal, and open the browser with
